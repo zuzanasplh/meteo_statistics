@@ -1,0 +1,498 @@
+#include "sql_database.h"
+
+/*
+ *SQL connect
+ *connect to sql database
+ */
+int SQL_database::SQL_connect(std::string host_name, std::string user_name, std::string password, std::string schema)
+{
+	try{
+		driver = get_driver_instance();
+		con = driver->connect(host_name.c_str(), user_name.c_str(), password.c_str());
+		con->setSchema(schema.c_str());
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL connection error");
+		message.exec();
+		return SQL_CONNECTION_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *SQL disconnect
+ *disconnect from SQL database
+ */
+int SQL_database::SQL_disconnect(void)
+{
+	try
+	{
+		con->close();
+		this->driver->threadEnd();
+	}
+	catch (sql::SQLException &e)
+	{
+		QMessageBox message;
+		message.setText("SQL close connection error");
+		message.exec();
+		return SQL_CONNECTION_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Delete table
+ *delete table from SQL database
+ */
+int SQL_database::delete_table(const std::string table)
+{
+	sql::SQLString str;
+	try{
+		str.append("DELETE FROM ");
+		str.append(table.c_str());
+		prep_stmt = con->prepareStatement(str);
+		prep_stmt->execute();
+	}
+
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL delete table error");
+		message.exec();
+		return SQL_DELETE_TABLE_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Import file
+ *open csv file, read by lines and insert new data into SQL database
+ */
+int SQL_database::import_file(QString filename, std::string table, QProgressBar* progress_bar)
+{
+	std::string line, delimiter = ",", partstr;
+	int i, nb_lines, actline, error;
+	size_t pos = 0;
+	std::vector<std::string> data(50);
+
+	try{
+		prep_stmt = con->prepareStatement("INSERT INTO meteo(datum_zapisu, InTemp, InHR, CH1Temp, CH1HR, CH2Temp, CH2HR, CH3Temp, CH3HR, CH4Temp, CH4HR, CH5Temp, CH5HR, UV, Baro, Weather, Wchill, Wgust, Wspeed, Wdir, RainCount)"
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL insert data error");
+		message.exec();
+		return SQL_INSERT_DATA_ERROR;
+	}
+
+	error = get_nb_lines(filename.toStdString(), &nb_lines);
+	if (error != SQL_OK)
+		return error;
+	std::ifstream fin(filename.toStdString());
+
+	progress_bar->setMaximum(nb_lines);
+	progress_bar->setValue(0);
+	actline = 0;
+
+	getline(fin, line);
+	actline++;
+	while (getline(fin, line)){
+		i = 0;
+		actline++;
+		while ((pos = line.find(delimiter)) != std::string::npos){
+			partstr.erase();
+			partstr.append(line.substr(0, pos));
+			data[i].append(partstr.c_str());
+			line.erase(0, pos + delimiter.length());
+			i++;
+		}
+		if (add_row(table, &data) == SQL_OK)
+		{
+			progress_bar->setValue(actline);
+			for (i = 0; i < 50; i++)
+				data[i].erase();
+		}
+		else
+			return SQL_INSERT_DATA_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Add row
+ *read line from csv file is compare with SQL data, if these data are new than are inserted into SQL database
+ */
+int SQL_database::add_row(std::string table, std::vector<std::string>* data)
+{
+	sql::SQLString sqldatetime;
+	int i, error;
+	bool row_exists;
+	std::vector<std::string> mdata;
+	mdata = *data;
+	std::string datetime;
+	//sqldatetime = NULL;
+
+	try{
+		datetime.clear();
+		datetime.append((mdata)[0]);
+		datetime.append("-");
+		datetime.append((mdata)[2]);
+		datetime.append("-");
+		datetime.append((mdata)[3]);
+		datetime.append(" ");
+		datetime.append((mdata)[4]);
+		datetime.append(":");
+		datetime.append((mdata)[5]);
+		datetime.append(":");
+		datetime.append("00");
+		sqldatetime.append(datetime.c_str());
+
+		error = check_row(table, "datum_zapisu", datetime, &row_exists);
+		if (error == SQL_SELECT_ERROR)
+			return SQL_SELECT_ERROR;
+		if (!row_exists){
+			prep_stmt->setDateTime(1, sqldatetime);
+			for (i = 6; i < 26; i++){
+				if (i == 7 || i == 9 || i == 11 || i == 13 || i == 15 || i == 17 || i == 18 || i == 20 || i == 24)
+				{
+					if ((mdata)[i].empty()){
+						prep_stmt->setNull(i - 4, sql::DataType::TINYINT);
+					}
+					else{
+						prep_stmt->setInt(i - 4, stoi((mdata)[i]));
+					}
+				}
+				else{
+					if ((mdata)[i].empty()){
+						prep_stmt->setNull(i - 4, sql::DataType::DOUBLE);
+					}
+					else{
+						prep_stmt->setDouble(i - 4, stof((mdata)[i]));
+					}
+				}
+			}
+			prep_stmt->execute();
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL insert data error");
+		message.exec();
+		return SQL_INSERT_DATA_ERROR;
+	}
+
+}
+
+/*
+ *Check column
+ *check if the column is exists in SQL database
+ */
+int SQL_database::check_column(std::string column_name, std::string table, int* count)
+{
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT COUNT(");
+		sql_query.append(column_name.c_str());
+		sql_query.append(") FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(";");
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			*count = res->getInt(1);
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL check_column error");
+		message.exec();
+		return SQL_CHECK_COLUMN_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Min column
+ *obtain the minimum value from the selected column from SQL database
+ */
+int SQL_database::min_column(std::string column, std::string start_DT, std::string end_DT, std::string table, float* min){
+	std::string query;
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT MIN(");
+		sql_query.append(column.c_str());
+		sql_query.append(") FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
+		sql_query.append(start_DT.c_str());
+		sql_query.append("\" AND \"");
+		sql_query.append(end_DT.c_str());
+		sql_query.append("\";");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			*min = res->getDouble(1);
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Max column
+ *obtain the maximum from the selected column from SQL database
+ */
+int SQL_database::max_column(std::string column, std::string start_DT, std::string end_DT, std::string table, float* max){
+	std::string query;
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT MAX(");
+		sql_query.append(column.c_str());
+		sql_query.append(") FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
+		sql_query.append(start_DT.c_str());
+		sql_query.append("\" AND \"");
+		sql_query.append(end_DT.c_str());
+		sql_query.append("\";");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			*max = res->getDouble(1);
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Avg column
+ *obtain average value from the selected column from SQL database
+ */
+int SQL_database::avg_column(std::string column, std::string start_DT, std::string end_DT, std::string table, float* avg){
+	std::string query;
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT AVG(");
+		sql_query.append(column.c_str());
+		sql_query.append(") FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
+		sql_query.append(start_DT.c_str());
+		sql_query.append("\" AND \"");
+		sql_query.append(end_DT.c_str());
+		sql_query.append("\";");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			*avg = res->getDouble(1);
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Get double values
+ *obtain double values from selected column, selected datetime range from SQL database
+ */
+int SQL_database::get_double_values(std::string column, std::string start_DT, std::string end_DT, std::string table, std::vector<double>* values)
+{
+	std::string query;
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT ");
+		sql_query.append(column.c_str());
+		sql_query.append(" FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
+		sql_query.append(start_DT.c_str());
+		sql_query.append("\" AND \"");
+		sql_query.append(end_DT.c_str());
+		sql_query.append("\";");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			if (res->isNull(1)){
+				values->push_back(-10000);
+			}
+			else{
+				values->push_back(res->getDouble(1));
+			}
+		}
+
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Get int values
+ *obtain int values from selected column, selected datetime range from SQL database 
+ */
+int SQL_database::get_int_values(std::string column, std::string start_DT, std::string end_DT, std::string table, std::vector<int>* values)
+{
+
+	std::string query;
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT ");
+		sql_query.append(column.c_str());
+		sql_query.append(" FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
+		sql_query.append(start_DT.c_str());
+		sql_query.append("\" AND \"");
+		sql_query.append(end_DT.c_str());
+		sql_query.append("\";");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			if (res->isNull(1)){
+				values->push_back(-10000);
+			}
+			else{
+				values->push_back(res->getInt(1));
+			}
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Get string values
+ *obtain string values from selected column, selected datetime range from SQL database
+ */
+int SQL_database::get_string_values(std::string column, std::string start_DT, std::string end_DT, std::string table, std::vector<std::string>* values)
+{
+	std::string query;
+	sql::SQLString sql_query;
+
+	try{
+		sql_query.append("SELECT ");
+		sql_query.append(column.c_str());
+		sql_query.append(" FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
+		sql_query.append(start_DT.c_str());
+		sql_query.append("\" AND \"");
+		sql_query.append(end_DT.c_str());
+		sql_query.append("\";");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			values->push_back(res->getString(1).c_str());
+		}
+	}
+
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*
+ *Check row
+ *check if the data are exists in SQL database, to avoid duplicate datas
+ */
+int SQL_database::check_row(std::string table, std::string column, std::string datetime, bool* exists)
+{
+	int result;
+	*exists = false;
+	std::string str_query;
+	str_query.clear();
+	sql::SQLString sql_query;
+	try{
+		sql_query.append("SELECT EXISTS(SELECT * FROM ");
+		sql_query.append(table.c_str());
+		sql_query.append(" WHERE ");
+		sql_query.append(column.c_str());
+		sql_query.append(" = \"");
+		sql_query.append(datetime.c_str());
+		sql_query.append("\");");
+
+		//SELECT EXISTS(SELECT * FROM meteo WHERE datum_zapisu = "2015-06-27 04:48:00");
+
+		stmt = con->createStatement();
+		res = stmt->executeQuery(sql_query);
+		while (res->next()){
+			result = res->getInt(1);
+		}
+		if (result == 1){
+			*exists = true;
+		}
+		else{
+			*exists = false;
+		}
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL select error");
+		message.exec();
+		return SQL_SELECT_ERROR;
+	}
+	return SQL_OK;
+}
+
+/*Get nb lines
+ *obtain how many lines contains the specified file
+ */
+int SQL_database::get_nb_lines(std::string filename, int* nb)
+{
+	char c;
+	int i;
+
+	try{
+		*nb = 0;
+		std::ifstream fin(filename);
+		while (fin.get(c)){
+			if (c == '\n')
+				++i;
+		}
+		fin.close();
+		*nb = i;
+	}
+	catch (sql::SQLException &e){
+		QMessageBox message;
+		message.setText("SQL check file lines error");
+		message.exec();
+		return SQL_CHECK_FILE_LINES;
+	}
+	return SQL_OK;
+}
