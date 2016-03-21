@@ -1,6 +1,7 @@
 #include "meteo_statistics.h"
 #include "ui_meteo_statistics.h"
 
+SQL_settings my_settings;
 /*
  *meteo_statistics constructor
  *create all graph, link signals with functions
@@ -37,6 +38,9 @@ meteo_statistics::meteo_statistics(QWidget *parent)
 	connect(ui->check_Wspeed, &QCheckBox::clicked, this, &meteo_statistics::draw_graph);
 	connect(ui->check_Wdir, &QCheckBox::clicked, this, &meteo_statistics::draw_graph);
 	connect(ui->check_RainCount, &QCheckBox::clicked, this, &meteo_statistics::draw_graph);
+	connect(ui->import_data_act, &QAction::triggered, this, &meteo_statistics::import_data);
+	connect(ui->SQL_con_act, &QAction::triggered, this, &meteo_statistics::SQL_set_connection);
+	
 }
 
 /*
@@ -48,42 +52,22 @@ meteo_statistics::~meteo_statistics()
 	delete ui;
 }
 
-/*
- *on_openpath_button_clicked
- *call file dialog window to choice file
- */
-void meteo_statistics::on_openpath_button_clicked()
+
+void meteo_statistics::import_data()
 {
-	QFileDialog FDialog(this);
-	FDialog.setFileMode(QFileDialog::AnyFile);
-	FDialog.setNameFilter(tr("Data(*.csv)"));
-	if (FDialog.exec()){
-		filename = FDialog.selectedFiles().first();
-	}
-	ui->path_text->setText(filename);
+	import_window.show();
 }
 
-/*
- *on_importdata_button_clicked
- *import data from csv file to SQL database
- */
-int meteo_statistics::on_importdata_button_clicked()
+void meteo_statistics::SQL_set_connection()
 {
-	int error;
-	ui->progress_import->setVisible(true);
-	error = my_meteo_database.SQL_connect(host_name, user_name, password, schema);
-	if (error != SQL_OK)
-		return error;
-	error = my_meteo_database.import_file(ui->path_text->toPlainText(), table, ui->progress_import);
-	if (error != SQL_OK)
-		return error;
-	error = my_meteo_database.SQL_disconnect();
-	if (error != SQL_OK)
-		return error;
-	ui->progress_import->setVisible(false);
-	return SQL_OK;
-}
+	sql_connection_window.set_hostname(my_settings.get_host_name());
+	sql_connection_window.set_username(my_settings.get_user_name());
+	sql_connection_window.set_password(my_settings.get_password());
+	sql_connection_window.set_schema(my_settings.get_schema());
+	sql_connection_window.set_table(my_settings.get_table());
 
+	sql_connection_window.show();
+}
 /*
  *on_unit_combo_currentIndexChanged
  *call this function when user select measured unit
@@ -116,8 +100,8 @@ int meteo_statistics::obtain_datetime()
 	qt_datetime = ui->dateTime_end->dateTime();
 	qstr_datetime = qt_datetime.toString("yyyy-MM-dd hh:mm:ss");
 	str_endDT = qstr_datetime.toLocal8Bit().constData();
-	my_meteo_database.SQL_connect(host_name, user_name, password, schema);
-	error = my_meteo_database.get_string_values("datum_zapisu", str_startDT, str_endDT, table, &datetime);
+	my_meteo_database.SQL_connect();
+	error = my_meteo_database.get_string_values("datum_zapisu", str_startDT, str_endDT, &datetime);
 	if (error != SQL_OK)
 		return error;
 	error = my_meteo_database.SQL_disconnect();
@@ -258,10 +242,10 @@ int meteo_statistics::draw_graph()
 
 		if (units[i]){
 			unit_to_string((unit)i);
-			error = my_meteo_database.SQL_connect(host_name, user_name, password, schema);
+			error = my_meteo_database.SQL_connect();
 			if (error != SQL_OK)
 				return error;
-			error = my_meteo_database.get_double_values(unit_to_string((unit)i), str_startDT, str_endDT, table, &data_temp);
+			error = my_meteo_database.get_double_values(unit_to_string((unit)i), str_startDT, str_endDT, &data_temp);
 			if (error != SQL_OK)
 				return error;
 			error = my_meteo_database.SQL_disconnect();
@@ -291,15 +275,13 @@ int meteo_statistics::check_meas_units()
 	ui->unit_combo->blockSignals(true);
 	ui->dateTime_start->blockSignals(true);
 	ui->dateTime_end->blockSignals(true);
-	ui->progress_import->setDisabled(true);
-	ui->progress_import->setVisible(false);
 	ui->dateTime_end->setDateTime(QDateTime::currentDateTime());
 	ui->dateTime_start->setDateTime(QDateTime::currentDateTime());
-	error = my_meteo_database.SQL_connect(host_name, user_name, password, schema);
+	error = my_meteo_database.SQL_connect();
 	if (error != SQL_OK)
 		return error;
 	
-	error = my_meteo_database.check_column("InTemp", table, &count);
+	error = my_meteo_database.check_column("InTemp", &count);
 	if (error != SQL_OK)
 		return error;
 
@@ -312,7 +294,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_InTemp->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("InHR", table, &count);
+	error = my_meteo_database.check_column("InHR", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -324,7 +306,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_InHR->setDisabled(true);
 	}
 
-	error =my_meteo_database.check_column("CH1Temp", table, &count);
+	error =my_meteo_database.check_column("CH1Temp", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -336,7 +318,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH1Temp->setDisabled(true);
 	}
 
-	error =my_meteo_database.check_column("CH1HR", table, &count);
+	error =my_meteo_database.check_column("CH1HR", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -348,7 +330,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH1HR->setDisabled(true);
 	}
 
-	error =my_meteo_database.check_column("CH2Temp", table, &count);
+	error =my_meteo_database.check_column("CH2Temp", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -360,7 +342,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH2Temp->setDisabled(true);
 	}
 
-	error =my_meteo_database.check_column("CH2HR", table, &count);
+	error =my_meteo_database.check_column("CH2HR", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -372,7 +354,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH2HR->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("CH3Temp", table, &count);
+	error = my_meteo_database.check_column("CH3Temp", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -384,7 +366,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH3Temp->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("CH3HR", table, &count);
+	error = my_meteo_database.check_column("CH3HR", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -396,7 +378,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH3HR->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("CH4Temp", table, &count);
+	error = my_meteo_database.check_column("CH4Temp" ,&count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -408,7 +390,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH4Temp->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("CH4HR", table, &count);
+	error = my_meteo_database.check_column("CH4HR", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -420,7 +402,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH4HR->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("CH5Temp", table, &count);
+	error = my_meteo_database.check_column("CH5Temp", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -432,7 +414,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH5Temp->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("CH5HR", table, &count);
+	error = my_meteo_database.check_column("CH5HR", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -444,7 +426,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_CH5HR->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("UV", table, &count);
+	error = my_meteo_database.check_column("UV", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -456,7 +438,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_UV->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("Baro", table, &count);
+	error = my_meteo_database.check_column("Baro", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -468,7 +450,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_Baro->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("Weather", table, &count);
+	error = my_meteo_database.check_column("Weather", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -479,7 +461,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_Weather->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("Wchill", table, &count);
+	error = my_meteo_database.check_column("Wchill", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -491,7 +473,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_Wchill->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("Wgust", table, &count);
+	error = my_meteo_database.check_column("Wgust", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -503,7 +485,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_Wgust->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("Wspeed", table, &count);
+	error = my_meteo_database.check_column("Wspeed", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -515,7 +497,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_Wspeed->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("Wdir", table, &count);
+	error = my_meteo_database.check_column("Wdir", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -527,7 +509,7 @@ int meteo_statistics::check_meas_units()
 		ui->check_Wdir->setDisabled(true);
 	}
 
-	error = my_meteo_database.check_column("RainCount", table, &count);
+	error = my_meteo_database.check_column("RainCount", &count);
 	if (error != SQL_OK)
 		return error;
 	count_str.setNum(count);
@@ -549,6 +531,20 @@ int meteo_statistics::check_meas_units()
 	return SQL_OK;
 }
 
+int meteo_statistics::read_settings()
+{
+	int error;
+	error = my_settings.read_settings();
+	if (error != 0){
+		QMessageBox message;
+		message.setText("error read ini file");
+		message.exec();
+		return error;
+	}
+	return error;
+}
+
+
 /*
  *Calculate statistics
  *calculate basic statistics on choosed measuring unit
@@ -564,16 +560,16 @@ int meteo_statistics::calculate_statistics()
 	text = ui->unit_combo->currentText();
 	unit = text.toLocal8Bit().constData();
 	if (!unit.empty()){
-		error = my_meteo_database.SQL_connect(host_name, user_name, password, schema);
+		error = my_meteo_database.SQL_connect();
 		if (error != SQL_OK)
 			return error;
-		error = my_meteo_database.min_column(unit, str_startDT, str_endDT, table, &min);
+		error = my_meteo_database.min_column(unit, str_startDT, str_endDT, &min);
 		if (error != SQL_OK)
 			return error;
-		error = my_meteo_database.max_column(unit, str_startDT, str_endDT, table, &max);
+		error = my_meteo_database.max_column(unit, str_startDT, str_endDT, &max);
 		if (error != SQL_OK)
 			return error;
-		error = my_meteo_database.avg_column(unit, str_startDT, str_endDT, table, &avg);
+		error = my_meteo_database.avg_column(unit, str_startDT, str_endDT, &avg);
 		if (error != SQL_OK)
 			return error;
 		error = my_meteo_database.SQL_disconnect();

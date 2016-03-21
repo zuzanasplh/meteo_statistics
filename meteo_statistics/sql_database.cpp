@@ -1,15 +1,183 @@
 #include "sql_database.h"
+#include "global.h"
+
+SQL_settings::SQL_settings()
+{
+	SQL_set = new QSettings("SQL_settings.ini", QSettings::IniFormat);
+}
+
+SQL_settings::~SQL_settings()
+{
+	delete SQL_set;
+	SQL_set = NULL;
+}
+//void SQL_settings::set_parameters(std::string in_host_name, std::string in_user_name, std::string in_password, std::string in_schema, std::string in_table)
+//{
+//	host_name.clear();
+//	user_name.clear();
+//	password.clear();
+//	schema.clear();
+//	table.clear();
+//	host_name.append(in_host_name);
+//	user_name.append(in_user_name);
+//	password.append(in_password);
+//	schema.append(in_schema);
+//	table.append(in_table);
+//}
+
+std::string SQL_settings::get_host_name()
+{
+	return host_name;
+}
+
+std::string SQL_settings::get_user_name()
+{
+	return user_name;
+}
+
+std::string SQL_settings::get_password()
+{
+	return password;
+}
+
+std::string SQL_settings::get_schema()
+{
+	return schema;
+}
+
+std::string SQL_settings::get_table()
+{
+	return table;
+}
+
+void SQL_settings::set_hostname(std::string in_hostname)
+{
+	host_name.clear();
+	host_name.append(in_hostname);
+}
+
+void SQL_settings::set_username(std::string in_username)
+{
+	user_name.clear();
+	user_name.append(in_username);
+}
+
+void SQL_settings::set_password(std::string in_password)
+{
+	password.clear();
+	password.append(in_password);
+}
+
+void SQL_settings::set_schema(std::string in_schema)
+{
+	schema.clear();
+	schema.append(in_schema);
+}
+
+void SQL_settings::set_table(std::string in_table)
+{
+	table.clear();
+	table.append(in_table);
+}
+
+int SQL_settings::read_settings()
+{
+	host_name.clear();
+	user_name.clear();
+	password.clear();
+	schema.clear();
+	table.clear();
+
+	SQL_set->beginGroup("SQL_settings");
+
+	if (SQL_set->contains("host_name") == true)
+		host_name.append(SQL_set->value("host_name").toString().toStdString());
+	else
+		return SQL_READ_INI_FILE_ERROR;
+
+	if (SQL_set->contains("user_name") == true)
+		user_name.append(SQL_set->value("user_name").toString().toStdString());
+	else
+		return SQL_READ_INI_FILE_ERROR;
+
+	if (SQL_set->contains("password") == true)
+		password.append(SQL_set->value("password").toString().toStdString());
+	else
+		return SQL_READ_INI_FILE_ERROR;
+
+	if (SQL_set->contains("schema") == true)
+		schema.append(SQL_set->value("schema").toString().toStdString());
+	else
+		return SQL_READ_INI_FILE_ERROR;
+
+	if (SQL_set->contains("table") == true)
+		table.append(SQL_set->value("table").toString().toStdString());
+	else
+		return SQL_READ_INI_FILE_ERROR;
+
+	SQL_set->endGroup();
+	return SQL_OK;
+}
+
+int SQL_settings::write_settings()
+{
+	SQL_set->beginGroup("SQL_settings");
+
+	if (SQL_set->contains("host_name") == true){
+		SQL_set->setValue("host_name", host_name.c_str());
+	}
+	else
+		return SQL_WRITE_INI_FILE_ERROR;
+
+	if (SQL_set->contains("user_name") == true){
+		SQL_set->setValue("user_name", user_name.c_str());
+	}
+	else
+		return SQL_WRITE_INI_FILE_ERROR;
+
+	if (SQL_set->contains("password") == true){
+		SQL_set->setValue("password", password.c_str());
+	}
+	else
+		return SQL_WRITE_INI_FILE_ERROR;
+
+	if (SQL_set->contains("schema") == true){
+		SQL_set->setValue("schema", schema.c_str());
+	}
+	else
+		return SQL_WRITE_INI_FILE_ERROR;
+
+	if (SQL_set->contains("table") == true){
+		SQL_set->setValue("table", table.c_str());
+	}
+	else
+		return SQL_WRITE_INI_FILE_ERROR;
+}
+//void SQL_database::set_connection(std::string in_host_name, std::string in_user_name, std::string in_password, std::string in_schema,
+//	std::string in_table)
+//{
+//	my_settings.set_parameters(in_host_name, in_user_name, in_password, in_schema, in_table);
+//}
+
+//int SQL_database::get_all_settings()
+//{
+//	int error;
+//	error = my_settings.read_settings();
+//	return error;
+//}
+
 
 /*
  *SQL connect
  *connect to sql database
  */
-int SQL_database::SQL_connect(std::string host_name, std::string user_name, std::string password, std::string schema)
+int SQL_database::SQL_connect()
 {
 	try{
 		driver = get_driver_instance();
-		con = driver->connect(host_name.c_str(), user_name.c_str(), password.c_str());
-		con->setSchema(schema.c_str());
+		con = driver->connect(my_settings.get_host_name().c_str(), my_settings.get_user_name().c_str(), 
+			my_settings.get_password().c_str());
+		con->setSchema(my_settings.get_schema().c_str());
 	}
 	catch (sql::SQLException &e){
 		QMessageBox message;
@@ -24,7 +192,7 @@ int SQL_database::SQL_connect(std::string host_name, std::string user_name, std:
  *SQL disconnect
  *disconnect from SQL database
  */
-int SQL_database::SQL_disconnect(void)
+int SQL_database::SQL_disconnect()
 {
 	try
 	{
@@ -45,30 +213,30 @@ int SQL_database::SQL_disconnect(void)
  *Delete table
  *delete table from SQL database
  */
-int SQL_database::delete_table(const std::string table)
-{
-	sql::SQLString str;
-	try{
-		str.append("DELETE FROM ");
-		str.append(table.c_str());
-		prep_stmt = con->prepareStatement(str);
-		prep_stmt->execute();
-	}
-
-	catch (sql::SQLException &e){
-		QMessageBox message;
-		message.setText("SQL delete table error");
-		message.exec();
-		return SQL_DELETE_TABLE_ERROR;
-	}
-	return SQL_OK;
-}
+//int SQL_database::delete_table(const std::string table)
+//{
+//	sql::SQLString str;
+//	try{
+//		str.append("DELETE FROM ");
+//		str.append(table.c_str());
+//		prep_stmt = con->prepareStatement(str);
+//		prep_stmt->execute();
+//	}
+//
+//	catch (sql::SQLException &e){
+//		QMessageBox message;
+//		message.setText("SQL delete table error");
+//		message.exec();
+//		return SQL_DELETE_TABLE_ERROR;
+//	}
+//	return SQL_OK;
+//}
 
 /*
  *Import file
  *open csv file, read by lines and insert new data into SQL database
  */
-int SQL_database::import_file(QString filename, std::string table, QProgressBar* progress_bar)
+int SQL_database::import_file(QString filename, QProgressBar* progress_bar)
 {
 	std::string line, delimiter = ",", partstr;
 	int i, nb_lines, actline, error;
@@ -107,7 +275,7 @@ int SQL_database::import_file(QString filename, std::string table, QProgressBar*
 			line.erase(0, pos + delimiter.length());
 			i++;
 		}
-		if (add_row(table, &data) == SQL_OK)
+		if (add_row(&data) == SQL_OK)
 		{
 			progress_bar->setValue(actline);
 			for (i = 0; i < 50; i++)
@@ -123,7 +291,7 @@ int SQL_database::import_file(QString filename, std::string table, QProgressBar*
  *Add row
  *read line from csv file is compare with SQL data, if these data are new than are inserted into SQL database
  */
-int SQL_database::add_row(std::string table, std::vector<std::string>* data)
+int SQL_database::add_row(std::vector<std::string>* data)
 {
 	sql::SQLString sqldatetime;
 	int i, error;
@@ -148,7 +316,7 @@ int SQL_database::add_row(std::string table, std::vector<std::string>* data)
 		datetime.append("00");
 		sqldatetime.append(datetime.c_str());
 
-		error = check_row(table, "datum_zapisu", datetime, &row_exists);
+		error = check_row("datum_zapisu", datetime, &row_exists);
 		if (error == SQL_SELECT_ERROR)
 			return SQL_SELECT_ERROR;
 		if (!row_exists){
@@ -174,6 +342,8 @@ int SQL_database::add_row(std::string table, std::vector<std::string>* data)
 			}
 			prep_stmt->execute();
 		}
+		else
+			return SQL_OK;
 	}
 	catch (sql::SQLException &e){
 		QMessageBox message;
@@ -188,14 +358,14 @@ int SQL_database::add_row(std::string table, std::vector<std::string>* data)
  *Check column
  *check if the column is exists in SQL database
  */
-int SQL_database::check_column(std::string column_name, std::string table, int* count)
+int SQL_database::check_column(std::string column_name, int* count)
 {
 	sql::SQLString sql_query;
 	try{
 		sql_query.append("SELECT COUNT(");
 		sql_query.append(column_name.c_str());
 		sql_query.append(") FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(";");
 		stmt = con->createStatement();
 		res = stmt->executeQuery(sql_query);
@@ -216,14 +386,14 @@ int SQL_database::check_column(std::string column_name, std::string table, int* 
  *Min column
  *obtain the minimum value from the selected column from SQL database
  */
-int SQL_database::min_column(std::string column, std::string start_DT, std::string end_DT, std::string table, float* min){
+int SQL_database::min_column(std::string column, std::string start_DT, std::string end_DT, float* min){
 	std::string query;
 	sql::SQLString sql_query;
 	try{
 		sql_query.append("SELECT MIN(");
 		sql_query.append(column.c_str());
 		sql_query.append(") FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
 		sql_query.append(start_DT.c_str());
 		sql_query.append("\" AND \"");
@@ -249,14 +419,14 @@ int SQL_database::min_column(std::string column, std::string start_DT, std::stri
  *Max column
  *obtain the maximum from the selected column from SQL database
  */
-int SQL_database::max_column(std::string column, std::string start_DT, std::string end_DT, std::string table, float* max){
+int SQL_database::max_column(std::string column, std::string start_DT, std::string end_DT, float* max){
 	std::string query;
 	sql::SQLString sql_query;
 	try{
 		sql_query.append("SELECT MAX(");
 		sql_query.append(column.c_str());
 		sql_query.append(") FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
 		sql_query.append(start_DT.c_str());
 		sql_query.append("\" AND \"");
@@ -282,14 +452,14 @@ int SQL_database::max_column(std::string column, std::string start_DT, std::stri
  *Avg column
  *obtain average value from the selected column from SQL database
  */
-int SQL_database::avg_column(std::string column, std::string start_DT, std::string end_DT, std::string table, float* avg){
+int SQL_database::avg_column(std::string column, std::string start_DT, std::string end_DT, float* avg){
 	std::string query;
 	sql::SQLString sql_query;
 	try{
 		sql_query.append("SELECT AVG(");
 		sql_query.append(column.c_str());
 		sql_query.append(") FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
 		sql_query.append(start_DT.c_str());
 		sql_query.append("\" AND \"");
@@ -315,7 +485,7 @@ int SQL_database::avg_column(std::string column, std::string start_DT, std::stri
  *Get double values
  *obtain double values from selected column, selected datetime range from SQL database
  */
-int SQL_database::get_double_values(std::string column, std::string start_DT, std::string end_DT, std::string table, std::vector<double>* values)
+int SQL_database::get_double_values(std::string column, std::string start_DT, std::string end_DT, std::vector<double>* values)
 {
 	std::string query;
 	sql::SQLString sql_query;
@@ -323,7 +493,7 @@ int SQL_database::get_double_values(std::string column, std::string start_DT, st
 		sql_query.append("SELECT ");
 		sql_query.append(column.c_str());
 		sql_query.append(" FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
 		sql_query.append(start_DT.c_str());
 		sql_query.append("\" AND \"");
@@ -355,7 +525,7 @@ int SQL_database::get_double_values(std::string column, std::string start_DT, st
  *Get int values
  *obtain int values from selected column, selected datetime range from SQL database 
  */
-int SQL_database::get_int_values(std::string column, std::string start_DT, std::string end_DT, std::string table, std::vector<int>* values)
+int SQL_database::get_int_values(std::string column, std::string start_DT, std::string end_DT, std::vector<int>* values)
 {
 
 	std::string query;
@@ -364,7 +534,7 @@ int SQL_database::get_int_values(std::string column, std::string start_DT, std::
 		sql_query.append("SELECT ");
 		sql_query.append(column.c_str());
 		sql_query.append(" FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
 		sql_query.append(start_DT.c_str());
 		sql_query.append("\" AND \"");
@@ -395,7 +565,7 @@ int SQL_database::get_int_values(std::string column, std::string start_DT, std::
  *Get string values
  *obtain string values from selected column, selected datetime range from SQL database
  */
-int SQL_database::get_string_values(std::string column, std::string start_DT, std::string end_DT, std::string table, std::vector<std::string>* values)
+int SQL_database::get_string_values(std::string column, std::string start_DT, std::string end_DT, std::vector<std::string>* values)
 {
 	std::string query;
 	sql::SQLString sql_query;
@@ -404,7 +574,7 @@ int SQL_database::get_string_values(std::string column, std::string start_DT, st
 		sql_query.append("SELECT ");
 		sql_query.append(column.c_str());
 		sql_query.append(" FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE datum_zapisu BETWEEN \"");
 		sql_query.append(start_DT.c_str());
 		sql_query.append("\" AND \"");
@@ -431,7 +601,7 @@ int SQL_database::get_string_values(std::string column, std::string start_DT, st
  *Check row
  *check if the data are exists in SQL database, to avoid duplicate datas
  */
-int SQL_database::check_row(std::string table, std::string column, std::string datetime, bool* exists)
+int SQL_database::check_row(std::string column, std::string datetime, bool* exists)
 {
 	int result;
 	*exists = false;
@@ -440,7 +610,7 @@ int SQL_database::check_row(std::string table, std::string column, std::string d
 	sql::SQLString sql_query;
 	try{
 		sql_query.append("SELECT EXISTS(SELECT * FROM ");
-		sql_query.append(table.c_str());
+		sql_query.append(my_settings.get_table().c_str());
 		sql_query.append(" WHERE ");
 		sql_query.append(column.c_str());
 		sql_query.append(" = \"");
@@ -480,6 +650,7 @@ int SQL_database::get_nb_lines(std::string filename, int* nb)
 
 	try{
 		*nb = 0;
+		i = 0;
 		std::ifstream fin(filename);
 		while (fin.get(c)){
 			if (c == '\n')

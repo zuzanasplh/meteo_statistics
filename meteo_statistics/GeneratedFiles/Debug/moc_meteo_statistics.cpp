@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_meteo_statistics_t {
     QByteArrayData data[6];
-    char stringdata0[129];
+    char stringdata0[104];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,15 +32,14 @@ static const qt_meta_stringdata_meteo_statistics_t qt_meta_stringdata_meteo_stat
 QT_MOC_LITERAL(0, 0, 16), // "meteo_statistics"
 QT_MOC_LITERAL(1, 17, 20), // "calculate_statistics"
 QT_MOC_LITERAL(2, 38, 0), // ""
-QT_MOC_LITERAL(3, 39, 26), // "on_openpath_button_clicked"
-QT_MOC_LITERAL(4, 66, 28), // "on_importdata_button_clicked"
-QT_MOC_LITERAL(5, 95, 33) // "on_unit_combo_currentIndexCha..."
+QT_MOC_LITERAL(3, 39, 33), // "on_unit_combo_currentIndexCha..."
+QT_MOC_LITERAL(4, 73, 11), // "import_data"
+QT_MOC_LITERAL(5, 85, 18) // "SQL_set_connection"
 
     },
     "meteo_statistics\0calculate_statistics\0"
-    "\0on_openpath_button_clicked\0"
-    "on_importdata_button_clicked\0"
-    "on_unit_combo_currentIndexChanged"
+    "\0on_unit_combo_currentIndexChanged\0"
+    "import_data\0SQL_set_connection"
 };
 #undef QT_MOC_LITERAL
 
@@ -65,9 +64,9 @@ static const uint qt_meta_data_meteo_statistics[] = {
 
  // slots: parameters
     QMetaType::Int,
+    QMetaType::Int,
     QMetaType::Void,
-    QMetaType::Int,
-    QMetaType::Int,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -80,11 +79,10 @@ void meteo_statistics::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
         switch (_id) {
         case 0: { int _r = _t->calculate_statistics();
             if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
-        case 1: _t->on_openpath_button_clicked(); break;
-        case 2: { int _r = _t->on_importdata_button_clicked();
+        case 1: { int _r = _t->on_unit_combo_currentIndexChanged();
             if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
-        case 3: { int _r = _t->on_unit_combo_currentIndexChanged();
-            if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
+        case 2: _t->import_data(); break;
+        case 3: _t->SQL_set_connection(); break;
         default: ;
         }
     }

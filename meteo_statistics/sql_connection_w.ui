@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SQL_connection_w</class>
+ <widget class="QWidget" name="SQL_connection_w">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>265</width>
+    <height>181</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SQL_connection_w</string>
+  </property>
+  <widget class="QPushButton" name="OK_button">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>150</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancel_button">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>150</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>38</x>
+     <y>12</y>
+     <width>191</width>
+     <height>126</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="3">
+     <widget class="QLabel" name="hostname_label">
+      <property name="text">
+       <string>host name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QLineEdit" name="host_name_line"/>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <widget class="QLabel" name="user_name_label">
+      <property name="text">
+       <string>user name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QLineEdit" name="user_name_line"/>
+    </item>
+    <item row="2" column="0" colspan="3">
+     <widget class="QLabel" name="password_label">
+      <property name="text">
+       <string>password</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLineEdit" name="password_line"/>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QLabel" name="schema_label">
+      <property name="text">
+       <string>schema</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="table_label">
+      <property name="text">
+       <string>table</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QLineEdit" name="schema_line"/>
+    </item>
+    <item row="4" column="3">
+     <widget class="QLineEdit" name="table_line"/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>OK_button</sender>
+   <signal>clicked()</signal>
+   <receiver>SQL_connection_w</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>105</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>143</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
