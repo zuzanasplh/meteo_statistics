@@ -542,7 +542,8 @@ int meteo_statistics::check_meas_units()
 
 /*
  *Read settings
- *call function from SQL_database class to read settings from ini file/
+ *call function from SQL_database class to read settings from ini file
+ */
 int meteo_statistics::read_settings()
 {
 	int error;
