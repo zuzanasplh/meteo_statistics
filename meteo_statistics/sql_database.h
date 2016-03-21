@@ -63,11 +63,7 @@ private:
 class SQL_database
 {
 public:
-	//void set_connection(std::string in_host_name, std::string in_user_name, std::string in_password, std::string in_schema,
-	//	std::string in_table);
-	//int delete_table(const std::string table);
 	int import_file(QString filename, QProgressBar *progress_bar);
-	//int get_all_settings();
 	int SQL_connect();
 	int SQL_disconnect();
 	int check_column(std::string column_name, int *count);

@@ -5,12 +5,6 @@
 #include <QtWidgets/QMainWindow>
 #include "sql_database.h"
 
-//const std::string host_name = "tcp://127.0.0.1:3306";
-//const std::string user_name = "SQL_francescoh";
-//const std::string password = "elixir";
-//const std::string schema = "test";
-//const std::string table = "meteo";
-
 enum unit{
 	datum_zapisu = 0,
 	InTemp,

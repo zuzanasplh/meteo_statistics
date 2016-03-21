@@ -3,7 +3,7 @@
 
 SQL_settings my_settings;
 /*
- *meteo_statistics constructor
+ *Meteo_statistics constructor
  *create all graph, link signals with functions
  */
 meteo_statistics::meteo_statistics(QWidget *parent)
@@ -44,7 +44,7 @@ meteo_statistics::meteo_statistics(QWidget *parent)
 }
 
 /*
- *meteo_statistics destructor
+ *Meteo_statistics destructor
  */
 meteo_statistics::~meteo_statistics()
 {
@@ -52,12 +52,20 @@ meteo_statistics::~meteo_statistics()
 	delete ui;
 }
 
-
+/*
+ *Import_data
+ *open window to import data from csv file
+ */
 void meteo_statistics::import_data()
 {
 	import_window.show();
 }
 
+/*
+ *SQL_set_connection
+ *fill lines with valuus from global variable
+ *and show window
+ */
 void meteo_statistics::SQL_set_connection()
 {
 	sql_connection_window.set_hostname(my_settings.get_host_name());
@@ -68,8 +76,9 @@ void meteo_statistics::SQL_set_connection()
 
 	sql_connection_window.show();
 }
+
 /*
- *on_unit_combo_currentIndexChanged
+ *On_unit_combo_currentIndexChanged
  *call this function when user select measured unit
  *obtain data from SQL database and calculete basic statistics
  */
@@ -531,6 +540,9 @@ int meteo_statistics::check_meas_units()
 	return SQL_OK;
 }
 
+/*
+ *Read settings
+ *call function from SQL_database class to read settings from ini file/
 int meteo_statistics::read_settings()
 {
 	int error;

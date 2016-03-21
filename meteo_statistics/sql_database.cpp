@@ -1,85 +1,125 @@
 #include "sql_database.h"
 #include "global.h"
 
+/*
+ *SQL settings
+ *constructor
+ *create QSettings varible, set the ini file name and path
+ */
 SQL_settings::SQL_settings()
 {
 	SQL_set = new QSettings("SQL_settings.ini", QSettings::IniFormat);
 }
 
+/*
+ *SQL settings
+ *destructor
+ */
 SQL_settings::~SQL_settings()
 {
 	delete SQL_set;
 	SQL_set = NULL;
 }
-//void SQL_settings::set_parameters(std::string in_host_name, std::string in_user_name, std::string in_password, std::string in_schema, std::string in_table)
-//{
-//	host_name.clear();
-//	user_name.clear();
-//	password.clear();
-//	schema.clear();
-//	table.clear();
-//	host_name.append(in_host_name);
-//	user_name.append(in_user_name);
-//	password.append(in_password);
-//	schema.append(in_schema);
-//	table.append(in_table);
-//}
 
+/*
+ *Get host name
+ *return hostname from global variable
+ */
 std::string SQL_settings::get_host_name()
 {
 	return host_name;
 }
 
+/*
+ *Get user name
+ *return user name from global variable
+ */
 std::string SQL_settings::get_user_name()
 {
 	return user_name;
 }
 
+/*
+ *Get password
+ *return password from global variable
+ */
 std::string SQL_settings::get_password()
 {
 	return password;
 }
 
+/*
+ *Get schema
+ *return schema from global variable
+ */
 std::string SQL_settings::get_schema()
 {
 	return schema;
 }
 
+/*
+ *Get table
+ *return table from global variable
+ */
 std::string SQL_settings::get_table()
 {
 	return table;
 }
 
+/*
+ *Set hostname
+ *set hostname into global variable
+ */
 void SQL_settings::set_hostname(std::string in_hostname)
 {
 	host_name.clear();
 	host_name.append(in_hostname);
 }
 
+/*
+ *Set username
+ *set username into global variable
+ */
 void SQL_settings::set_username(std::string in_username)
 {
 	user_name.clear();
 	user_name.append(in_username);
 }
 
+/*
+ *Set password
+ *set password into global variable
+ */
 void SQL_settings::set_password(std::string in_password)
 {
 	password.clear();
 	password.append(in_password);
 }
 
+/*
+ *Set schema
+ *set schema into global variable
+ */
 void SQL_settings::set_schema(std::string in_schema)
 {
 	schema.clear();
 	schema.append(in_schema);
 }
 
+/*
+ *Set table
+ *set table into global variable
+ */
 void SQL_settings::set_table(std::string in_table)
 {
 	table.clear();
 	table.append(in_table);
 }
 
+/*
+ *Read settings
+ *read settings from ini file
+ */
 int SQL_settings::read_settings()
 {
 	host_name.clear();
@@ -119,6 +159,10 @@ int SQL_settings::read_settings()
 	return SQL_OK;
 }
 
+/*
+ *Write settings
+ *write settings into ini file
+ */
 int SQL_settings::write_settings()
 {
 	SQL_set->beginGroup("SQL_settings");
@@ -153,19 +197,6 @@ int SQL_settings::write_settings()
 	else
 		return SQL_WRITE_INI_FILE_ERROR;
 }
-//void SQL_database::set_connection(std::string in_host_name, std::string in_user_name, std::string in_password, std::string in_schema,
-//	std::string in_table)
-//{
-//	my_settings.set_parameters(in_host_name, in_user_name, in_password, in_schema, in_table);
-//}
-
-//int SQL_database::get_all_settings()
-//{
-//	int error;
-//	error = my_settings.read_settings();
-//	return error;
-//}
-
 
 /*
  *SQL connect
@@ -208,29 +239,6 @@ int SQL_database::SQL_disconnect()
 	}
 	return SQL_OK;
 }
-
-/*
- *Delete table
- *delete table from SQL database
- */
-//int SQL_database::delete_table(const std::string table)
-//{
-//	sql::SQLString str;
-//	try{
-//		str.append("DELETE FROM ");
-//		str.append(table.c_str());
-//		prep_stmt = con->prepareStatement(str);
-//		prep_stmt->execute();
-//	}
-//
-//	catch (sql::SQLException &e){
-//		QMessageBox message;
-//		message.setText("SQL delete table error");
-//		message.exec();
-//		return SQL_DELETE_TABLE_ERROR;
-//	}
-//	return SQL_OK;
-//}
 
 /*
  *Import file
@@ -351,7 +359,7 @@ int SQL_database::add_row(std::vector<std::string>* data)
 		message.exec();
 		return SQL_INSERT_DATA_ERROR;
 	}
-
+	return SQL_OK;
 }
 
 /*

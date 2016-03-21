@@ -47,6 +47,5 @@ int import_data_w::on_importdata_button_clicked()
 	error = SQL_disconnect();
 	if (error != SQL_OK)
 		return error;
-	//ui->progress_import->setVisible(false);
 	return SQL_OK;
 }
