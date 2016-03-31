@@ -4,7 +4,7 @@
 /*
  *SQL settings
  *constructor
- *create QSettings varible, set the ini file name and path
+ *creates QSettings varible, sets the ini file name and path
  */
 SQL_settings::SQL_settings()
 {
@@ -22,8 +22,8 @@ SQL_settings::~SQL_settings()
 }
 
 /*
- *Get host name
- *return hostname from global variable
+ *Gets host name
+ *returns hostname from global variable
  */
 std::string SQL_settings::get_host_name()
 {
@@ -31,8 +31,8 @@ std::string SQL_settings::get_host_name()
 }
 
 /*
- *Get user name
- *return user name from global variable
+ *Gets user name
+ *returns user name from global variable
  */
 std::string SQL_settings::get_user_name()
 {
@@ -40,8 +40,8 @@ std::string SQL_settings::get_user_name()
 }
 
 /*
- *Get password
- *return password from global variable
+ *Gets password
+ *returns password from global variable
  */
 std::string SQL_settings::get_password()
 {
@@ -49,8 +49,8 @@ std::string SQL_settings::get_password()
 }
 
 /*
- *Get schema
- *return schema from global variable
+ *Gets schema
+ *returns schema from global variable
  */
 std::string SQL_settings::get_schema()
 {
@@ -58,8 +58,8 @@ std::string SQL_settings::get_schema()
 }
 
 /*
- *Get table
- *return table from global variable
+ *Gets table
+ *returns table from global variable
  */
 std::string SQL_settings::get_table()
 {
@@ -67,8 +67,8 @@ std::string SQL_settings::get_table()
 }
 
 /*
- *Set hostname
- *set hostname into global variable
+ *Sets hostname
+ *sets hostname into global variable
  */
 void SQL_settings::set_hostname(std::string in_hostname)
 {
@@ -77,8 +77,8 @@ void SQL_settings::set_hostname(std::string in_hostname)
 }
 
 /*
- *Set username
- *set username into global variable
+ *Sets username
+ *sets username into global variable
  */
 void SQL_settings::set_username(std::string in_username)
 {
@@ -87,8 +87,8 @@ void SQL_settings::set_username(std::string in_username)
 }
 
 /*
- *Set password
- *set password into global variable
+ *Sets password
+ *sets password into global variable
  */
 void SQL_settings::set_password(std::string in_password)
 {
@@ -97,8 +97,8 @@ void SQL_settings::set_password(std::string in_password)
 }
 
 /*
- *Set schema
- *set schema into global variable
+ *Sets schema
+ *sets schema into global variable
  */
 void SQL_settings::set_schema(std::string in_schema)
 {
@@ -107,8 +107,8 @@ void SQL_settings::set_schema(std::string in_schema)
 }
 
 /*
- *Set table
- *set table into global variable
+ *Sets table
+ *sets table into global variable
  */
 void SQL_settings::set_table(std::string in_table)
 {
@@ -117,8 +117,8 @@ void SQL_settings::set_table(std::string in_table)
 }
 
 /*
- *Read settings
- *read settings from ini file
+ *Reads settings
+ *reads settings from ini file
  */
 int SQL_settings::read_settings()
 {
@@ -160,8 +160,8 @@ int SQL_settings::read_settings()
 }
 
 /*
- *Write settings
- *write settings into ini file
+ *Writes settings
+ *writes settings into ini file
  */
 int SQL_settings::write_settings()
 {
@@ -200,7 +200,7 @@ int SQL_settings::write_settings()
 
 /*
  *SQL connect
- *connect to sql database
+ *connects to sql database
  */
 int SQL_database::SQL_connect()
 {
@@ -221,7 +221,7 @@ int SQL_database::SQL_connect()
 
 /*
  *SQL disconnect
- *disconnect from SQL database
+ *disconnects from SQL database
  */
 int SQL_database::SQL_disconnect()
 {
@@ -241,8 +241,8 @@ int SQL_database::SQL_disconnect()
 }
 
 /*
- *Import file
- *open csv file, read by lines and insert new data into SQL database
+ *Imports file
+ *opens csv file, reads by lines and inserts new data into SQL database
  */
 int SQL_database::import_file(QString filename, QProgressBar* progress_bar)
 {
@@ -296,8 +296,8 @@ int SQL_database::import_file(QString filename, QProgressBar* progress_bar)
 }
 
 /*
- *Add row
- *read line from csv file is compare with SQL data, if these data are new than are inserted into SQL database
+ *Adds row
+ *reads line from csv file and compares with SQL data, if these data are new than they are inserted into SQL database
  */
 int SQL_database::add_row(std::vector<std::string>* data)
 {
@@ -363,8 +363,8 @@ int SQL_database::add_row(std::vector<std::string>* data)
 }
 
 /*
- *Check column
- *check if the column is exists in SQL database
+ *Checks column
+ *checks if the column exists in SQL database
  */
 int SQL_database::check_column(std::string column_name, int* count)
 {
@@ -392,7 +392,7 @@ int SQL_database::check_column(std::string column_name, int* count)
 
 /*
  *Min column
- *obtain the minimum value from the selected column from SQL database
+ *obtains the minimum value from the selected column from SQL database
  */
 int SQL_database::min_column(std::string column, std::string start_DT, std::string end_DT, float* min){
 	std::string query;
@@ -425,7 +425,7 @@ int SQL_database::min_column(std::string column, std::string start_DT, std::stri
 
 /*
  *Max column
- *obtain the maximum from the selected column from SQL database
+ *obtains the maximum from the selected column from SQL database
  */
 int SQL_database::max_column(std::string column, std::string start_DT, std::string end_DT, float* max){
 	std::string query;
@@ -458,7 +458,7 @@ int SQL_database::max_column(std::string column, std::string start_DT, std::stri
 
 /*
  *Avg column
- *obtain average value from the selected column from SQL database
+ *obtains average value from the selected column from SQL database
  */
 int SQL_database::avg_column(std::string column, std::string start_DT, std::string end_DT, float* avg){
 	std::string query;
@@ -490,8 +490,8 @@ int SQL_database::avg_column(std::string column, std::string start_DT, std::stri
 }
 
 /*
- *Get double values
- *obtain double values from selected column, selected datetime range from SQL database
+ *Gets double values
+ *obtains double values from selected column, selected datetime range from SQL database
  */
 int SQL_database::get_double_values(std::string column, std::string start_DT, std::string end_DT, std::vector<double>* values)
 {
@@ -530,8 +530,8 @@ int SQL_database::get_double_values(std::string column, std::string start_DT, st
 }
 
 /*
- *Get int values
- *obtain int values from selected column, selected datetime range from SQL database 
+ *Gets int values
+ *obtains int values from selected column, selected datetime range from SQL database 
  */
 int SQL_database::get_int_values(std::string column, std::string start_DT, std::string end_DT, std::vector<int>* values)
 {
@@ -570,8 +570,8 @@ int SQL_database::get_int_values(std::string column, std::string start_DT, std::
 }
 
 /*
- *Get string values
- *obtain string values from selected column, selected datetime range from SQL database
+ *Gets string values
+ *obtains string values from selected column, selected datetime range from SQL database
  */
 int SQL_database::get_string_values(std::string column, std::string start_DT, std::string end_DT, std::vector<std::string>* values)
 {
@@ -606,8 +606,8 @@ int SQL_database::get_string_values(std::string column, std::string start_DT, st
 }
 
 /*
- *Check row
- *check if the data are exists in SQL database, to avoid duplicate datas
+ *Checks row
+ *checks if the data exist in SQL database, to avoid duplicate data
  */
 int SQL_database::check_row(std::string column, std::string datetime, bool* exists)
 {
@@ -648,8 +648,8 @@ int SQL_database::check_row(std::string column, std::string datetime, bool* exis
 	return SQL_OK;
 }
 
-/*Get nb lines
- *obtain how many lines contains the specified file
+/*Gets nb lines
+ *obtains how many lines the specified file contains
  */
 int SQL_database::get_nb_lines(std::string filename, int* nb)
 {
