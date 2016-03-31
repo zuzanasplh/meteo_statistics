@@ -4,7 +4,7 @@
 SQL_settings my_settings;
 /*
  *Meteo_statistics constructor
- *create all graph, link signals with functions
+ *creates entire graph, links signals with functions
  */
 meteo_statistics::meteo_statistics(QWidget *parent)
 	: QMainWindow(parent),
@@ -53,8 +53,8 @@ meteo_statistics::~meteo_statistics()
 }
 
 /*
- *Import_data
- *open window to import data from csv file
+ *Imports_data
+ *opens window to import data from csv file
  */
 void meteo_statistics::import_data()
 {
@@ -63,8 +63,8 @@ void meteo_statistics::import_data()
 
 /*
  *SQL_set_connection
- *fill lines with valuus from global variable
- *and show window
+ *fills lines with values from global variable
+ *and shows window
  */
 void meteo_statistics::SQL_set_connection()
 {
@@ -79,8 +79,8 @@ void meteo_statistics::SQL_set_connection()
 
 /*
  *On_unit_combo_currentIndexChanged
- *call this function when user select measured unit
- *obtain data from SQL database and calculete basic statistics
+ *calls this function when user selects measured unit
+ *obtains data from SQL database and calculates basic statistics
  */
 int meteo_statistics::on_unit_combo_currentIndexChanged()
 {
@@ -93,8 +93,8 @@ int meteo_statistics::on_unit_combo_currentIndexChanged()
 }
 
 /*
- *Obtain datetime
- *obtain datetime values from SQL database which are between the range
+ *Obtains datetime
+ *obtains datetime values from SQL database which are between the range
  */
 int meteo_statistics::obtain_datetime()
 {
@@ -122,8 +122,8 @@ int meteo_statistics::obtain_datetime()
 }
 
 /*
- *Check boxes
- *check which boxes - units are checked
+ *Checks boxes
+ *checks which boxes - units are checked
  */
 void meteo_statistics::checkboxes()
 {
@@ -231,9 +231,9 @@ void meteo_statistics::checkboxes()
 }
 
 /*
- *Draw graph
- *Based on checked boxes and selected datetime range the function
- *obtain data from SQL database and draw this data to graph
+ *Draws graph
+ *Based on checked boxes and selected datetime ranges the function
+ *obtains data from SQL database and draws this data to graph
  */
 int meteo_statistics::draw_graph()
 {
@@ -273,8 +273,8 @@ int meteo_statistics::draw_graph()
 }
 
 /*
- *Check meas units
- *Check which measured units are accessible from SQL database
+ *Checks measured units
+ *Checks which measured units are accessible from SQL database
  */
 int meteo_statistics::check_meas_units()
 {
@@ -541,8 +541,8 @@ int meteo_statistics::check_meas_units()
 }
 
 /*
- *Read settings
- *call function from SQL_database class to read settings from ini file
+ *Reads settings
+ *calls function from SQL_database class to read settings from ini file
  */
 int meteo_statistics::read_settings()
 {
@@ -559,9 +559,9 @@ int meteo_statistics::read_settings()
 
 
 /*
- *Calculate statistics
- *calculate basic statistics on choosed measuring unit
- *calculate mininum, maximum, average values
+ *Calculates statistics
+ *calculates basic statistics on chosen measuring unit
+ *calculates mininum, maximum, average values
  */
 int meteo_statistics::calculate_statistics()
 {
@@ -632,7 +632,7 @@ QVector<double> meteo_statistics::time_to_double()
 
 /*
  *Data correction
- *calculate additions from rain count to show how many mm fells
+ *calculates additions from rain count to show how many mm fells
  *NULL values from SQL database are replaced with -10000
  *this values are filled with the previous value
  */
