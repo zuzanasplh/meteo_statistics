@@ -3,7 +3,7 @@
 std::string color[20];
 
 /*
- *Set plot name
+ *Sets plot name
  */
 void plot::set_name(std::string name)
 {
@@ -11,7 +11,7 @@ void plot::set_name(std::string name)
 }
 
 /*
- *Set graph
+ *Sets graph
  */
 void plot::set_graph(QCPGraph *in_graph)
 {
@@ -19,7 +19,7 @@ void plot::set_graph(QCPGraph *in_graph)
 }
 
 /*
- *Set axis
+ *Sets axis
  */
 void plot::set_axis(QCPAxis *in_axis)
 {
@@ -27,7 +27,7 @@ void plot::set_axis(QCPAxis *in_axis)
 }
 
 /*
- *Get plot name
+ *Gets plot name
  */
 std::string plot::get_name(void)
 {
@@ -35,7 +35,7 @@ std::string plot::get_name(void)
 }
 
 /*
- *Get graph
+ *Gets graph
  */
 QCPGraph* plot::get_graph(void)
 {
@@ -43,7 +43,7 @@ QCPGraph* plot::get_graph(void)
 }
 
 /*
- *Get axis
+ *Gets axis
  */
 QCPAxis* plot::get_axis(void)
 {
@@ -52,9 +52,9 @@ QCPAxis* plot::get_axis(void)
 
 
 /*
- *Create graph with axis and set name,
- *set date and time format, tick count, label type, pen color, label color, tick label color
- *hide all axis and all graphs
+ *Creates graph with axis and sets name,
+ *sets date and time format, tick count, label type, pen color, label color, tick label color
+ *hides all axis and all graphs
  */
 void meteo_graph::create_graph(Ui::meteo_statisticsClass *ui)
 {
@@ -92,8 +92,8 @@ void meteo_graph::create_graph(Ui::meteo_statisticsClass *ui)
 }
 
 /*
- *Draw graph
- *clear old data, load new data from sql database, set visible axis and graph
+ *Draws graph
+ *clears old data, loads new data from sql database, sets visible axis and graph
  */
 void meteo_graph::draw_graph(int number, QVector<double> time, QVector<double> data)
 {
@@ -108,8 +108,8 @@ void meteo_graph::draw_graph(int number, QVector<double> time, QVector<double> d
 }
 
 /*
- *Hide graph
- *hide graph with axis
+ *Hides graph
+ *hides graph with axis
  */
 void meteo_graph::hide_graph(int number)
 {
@@ -118,7 +118,7 @@ void meteo_graph::hide_graph(int number)
 }
 
 /*
- *Delete graph
+ *Deletes graph
  */
 void meteo_graph::delete_graph(void)
 {
@@ -129,7 +129,7 @@ void meteo_graph::delete_graph(void)
 }
 
 /*
- *Get plot
+ *Gets plot
  */
 plot *meteo_graph::get_plot(int number)
 {
@@ -137,7 +137,7 @@ plot *meteo_graph::get_plot(int number)
 }
 
 /*
- *Get QCPAxisRect
+ *Gets QCPAxisRect
  */
 QCPAxisRect* meteo_graph::get_QCPAxisRect(void)
 {
