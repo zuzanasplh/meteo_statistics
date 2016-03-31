@@ -21,8 +21,8 @@ SQL_connection_w::~SQL_connection_w()
 }
 
 /*
- *Get hostname
- *obtain hostname from window
+ *Gets hostname
+ *obtains hostname from window
  */
 std::string SQL_connection_w::get_hostname()
 {
@@ -30,8 +30,8 @@ std::string SQL_connection_w::get_hostname()
 }
 
 /*
- *Get username
- *obtain username from window
+ *Gets username
+ *obtains username from window
  */
 std::string SQL_connection_w::get_username()
 {
@@ -39,8 +39,8 @@ std::string SQL_connection_w::get_username()
 }
 
 /*
- *Get password
- *obtain password from window
+ *Gets password
+ *obtains password from window
  */
 std::string SQL_connection_w::get_password()
 {
@@ -48,8 +48,8 @@ std::string SQL_connection_w::get_password()
 }
 
 /*
- *Get schema
- *obtain schema from window
+ *Gets schema
+ *obtains schema from window
  */
 std::string SQL_connection_w::get_schema()
 {
@@ -57,8 +57,8 @@ std::string SQL_connection_w::get_schema()
 }
 
 /*
- *Get table
- *obtain table from window
+ *Gets table
+ *obtains table from window
  */
 std::string SQL_connection_w::get_table()
 {
@@ -66,8 +66,8 @@ std::string SQL_connection_w::get_table()
 }
 
 /*
- *Set hostname
- *set hostname from global variable
+ *Sets hostname
+ *sets hostname from global variable
  */
 void SQL_connection_w::set_hostname(std::string in_hostname)
 {
@@ -78,8 +78,8 @@ void SQL_connection_w::set_hostname(std::string in_hostname)
 }
 
 /*
- *Set username
- *set username from global variable
+ *Sets username
+ *sets username from global variable
  */
 void SQL_connection_w::set_username(std::string in_username)
 {
@@ -90,8 +90,8 @@ void SQL_connection_w::set_username(std::string in_username)
 }
 
 /*
- *Set password
- *set password from global variable
+ *Sets password
+ *sets password from global variable
  */
 void SQL_connection_w::set_password(std::string in_password)
 {
@@ -102,8 +102,8 @@ void SQL_connection_w::set_password(std::string in_password)
 }
 
 /*
- *Set schema
- *set schema from global variable
+ *Sets schema
+ *sets schema from global variable
  */
 void SQL_connection_w::set_schema(std::string in_schema)
 {
@@ -114,8 +114,8 @@ void SQL_connection_w::set_schema(std::string in_schema)
 }
 
 /*
- *Set table
- *Set table form ini file
+ *Sets table
+ *Sets table form ini file
  */
 void SQL_connection_w::set_table(std::string in_table)
 {
@@ -127,7 +127,7 @@ void SQL_connection_w::set_table(std::string in_table)
 
 /*
  *On OK button clicked
- *read settings from lines and write into global variable and write into ini file
+ *reads settings from lines and write into global variable and write into ini file
  */
 void SQL_connection_w::on_OK_button_clicked()
 {
