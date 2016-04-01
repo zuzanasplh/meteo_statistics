@@ -22,8 +22,8 @@ SQL_settings::~SQL_settings()
 }
 
 /*
- *Get host name
- *return hostname from global variable
+ *Gets host name
+ *returns hostname from global variable
  */
 std::string SQL_settings::get_host_name()
 {
