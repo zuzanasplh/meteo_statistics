@@ -77,7 +77,7 @@ std::string unit_to_string(unit u)
 }
 
 /*
- *Converts graph labels to string
+ *Converts graph labels to strings
  */
 QString label_to_string(unit u)
 {
