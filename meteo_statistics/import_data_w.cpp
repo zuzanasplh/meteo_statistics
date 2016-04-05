@@ -17,7 +17,7 @@ import_data_w::~import_data_w()
 
 /*
 *on_openpath_button_clicked
-*call file dialog window to choice file
+*calls file dialog window to choice file
 */
 void import_data_w::on_openpath_button_clicked()
 {
